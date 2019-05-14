@@ -1,9 +1,11 @@
 import re
 import string
 import pandas as pd
+import pkg_resources
 
 def franco_arabic_transliterate(str):
-	rules_df = pd.read_csv('data/rules.tsv', sep='\t', header=None)
+	rules_file_location = pkg_resources.resource_filename('data', 'rules.tsv')
+	rules_df = pd.read_csv(rules_file_location, sep='\t', header=None)
 	str = str.lower()
 	tokens = str.split()
 
