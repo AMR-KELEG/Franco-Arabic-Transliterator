@@ -1,26 +1,58 @@
 import re
+import hfst
 import string
 import pandas as pd
 import pkg_resources
 
-def franco_arabic_transliterate(str):
-	rules_file_location = pkg_resources.resource_filename('data', 'rules.tsv')
-	rules_df = pd.read_csv(rules_file_location, sep='\t', header=None)
-	str = str.lower()
-	tokens = str.split()
+class FrancoArabicTransliterator:
+	def __init__(self):
+		rules_file_location = pkg_resources.resource_filename('data', 'hfst.att')
+		with open(rules_file_location, 'r') as f:
+			self.transducer = hfst.AttReader(f).read()
 
-	# Apply the regex rules in the order of occurence in the dataframe
-	for _, rule in rules_df.iterrows():
-		reg = rule.iloc[0]
-		sub = rule.iloc[1]
-		tokens = [re.sub(reg, sub, str) for str in tokens]
+	def transliterate(self, sentence):
+		transliteration = []
+		for word in sentence.split():
+			self.dp_dict = {}
+			transliteration.append(
+				sorted(self.__transliterate_word('^{}$'.format(word))))
+		return transliteration
 
-	# Remove remaining arabic characters
-	for c in string.ascii_letters:
-		tokens = [re.sub(r'{}+'.format(c), '', str) for str in tokens]
+	def __transliterate_word(self, word):
+		if not word:
+			return set()
+		if word in self.dp_dict:
+			return self.dp_dict[word]
+		results = self.__get_analyses(word)
+		for index in range(1, len(word)):
+			results = results.union(self.__join(
+				self.__transliterate_word(word[:index]),
+				self.__transliterate_word(word[index:])))
+		self.dp_dict[word] = results
+		return results
 
-	return ' '.join(tokens)
+	def __get_analyses(self, word):
+		results = self.transducer.lookup(word, output='raw')
+		if results:
+			return set([''.join([r for r in result[1] if not '@_EPSILON_SYMBOL_@' in r]) for result in results])
+		else:
+			return set()
+
+	def __join(self, prefixes_set, suffixes_set):
+		if not prefixes_set and not suffixes_set:
+			return set()
+
+		if not prefixes_set:
+			return suffixes_set
+
+		if not suffixes_set:
+			return prefixes_set
+
+		prefixes_set = list(prefixes_set)
+		suffixes_set = list(suffixes_set)
+		return set(['{}{}'.format(i1, i2) for i1 in prefixes_set for i2 in suffixes_set])
 
 if __name__=='__main__':
-	str = input().lower()
-	print(franco_arabic_transliterate(str))
+	word = input()
+	transliterator = FrancoArabicTransliterator()
+	print(transliterator.transliterate(word))
