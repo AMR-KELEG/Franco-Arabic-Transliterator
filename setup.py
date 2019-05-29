@@ -9,7 +9,7 @@ setuptools.setup(
 	author_email='amr_mohamed@live.com',
 	license='GPLv3',
 	packages=setuptools.find_packages(),
-	install_requires=['pandas'],
+	install_requires=['hfst'],
 	include_package_data=True,
 	zip_safe=False)
 
