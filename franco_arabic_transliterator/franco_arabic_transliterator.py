@@ -1,14 +1,20 @@
 import re
 import hfst
 import string
-import pandas as pd
+import logging
 import pkg_resources
+from functools import reduce
 
 class FrancoArabicTransliterator:
 	def __init__(self):
 		rules_file_location = pkg_resources.resource_filename('data', 'hfst.att')
 		with open(rules_file_location, 'r') as f:
 			self.transducer = hfst.AttReader(f).read()
+		self.logger = logging.getLogger('franco_arabic_transliterator')
+		logging.basicConfig(level=logging.DEBUG)
+
+		with open(pkg_resources.resource_filename('data', 'lexicon'), 'r') as f:
+			self.wordlist = {l.split('\t')[0]: int(l.split('\t')[1]) for l in f.readlines()}
 
 	def transliterate(self, sentence):
 		transliteration = []
@@ -16,7 +22,12 @@ class FrancoArabicTransliterator:
 			self.dp_dict = {}
 			transliteration.append(
 				sorted(self.__transliterate_word('^{}$'.format(word))))
-		return transliteration
+		self.logger.info('Number of valid strings before lexicon search are: {}'.format(
+			reduce((lambda x, y: x * y), [len(t) for t in transliteration])))
+		transliteration = [self.__filter(r) for r in transliteration]
+		self.logger.info('Number of valid strings after lexicon search are: {}'.format(
+			reduce((lambda x, y: x * y), [len(t) for t in transliteration])))
+		return ' '.join([self.__disambiguate(results) for results in transliteration])
 
 	def __transliterate_word(self, word):
 		if not word:
@@ -30,6 +41,16 @@ class FrancoArabicTransliterator:
 				self.__transliterate_word(word[index:])))
 		self.dp_dict[word] = results
 		return results
+
+	def __filter(self, word_results):
+		self.logger.debug('Results before disambiguation: {}'.format(' '.join(word_results)))
+		if sum([r in self.wordlist for r in word_results]) >0:
+			return {r: self.wordlist[r] for r in word_results if r in self.wordlist}
+		return {w:1 for w in word_results}
+
+	def __disambiguate(self, word_results):
+		# TODO: Use a better sorting function
+		return sorted(word_results, key=lambda t: len(t) + word_results[t]/1e6)[-1]
 
 	def __get_analyses(self, word):
 		results = self.transducer.lookup(word, output='raw')

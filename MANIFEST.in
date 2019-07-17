@@ -1,2 +1,3 @@
 include data/rules.tsv
 include data/hfst.att
+include data/lexicon
