@@ -13,3 +13,5 @@ transliterator = FrancoArabicTransliterator()
 print(transliterator.transliterate(str)) # ازيك يا حبيبي
 
 ```
+
+https://pypi.org/project/franco-arabic-transliterator/
