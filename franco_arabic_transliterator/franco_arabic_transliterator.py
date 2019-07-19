@@ -19,6 +19,7 @@ class FrancoArabicTransliterator:
 	def transliterate(self, sentence):
 		transliteration = []
 		for word in sentence.split():
+			word = word.lower()
 			self.dp_dict = {}
 			transliteration.append(
 				sorted(self.__transliterate_word('^{}$'.format(word))))
