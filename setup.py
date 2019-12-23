@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
 	name='franco_arabic_transliterator',
-	version='0.0.1.3',
+	version='0.0.1.4',
 	description='Convert franco-arabic text into arabic',
 	url='https://github.com/AMR-KELEG/Franco-Arabic-Transliterator',
 	author='Amr Keleg',
