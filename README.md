@@ -1,3 +1,4 @@
+![https://github.com/AMR-KELEG/Franco-Arabic-Transliterator/actions?query=workflow%3ABuild](https://github.com/AMR-KELEG/Franco-Arabic-Transliterator/workflows/Build/badge.svg)
 # Franco Arabic Transliterator
 A rule-based python script to convert romanised/franco arabic into Arabic.
 
