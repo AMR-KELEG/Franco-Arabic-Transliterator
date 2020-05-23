@@ -19,9 +19,10 @@ class FrancoArabicTransliterator:
 		with open(pkg_resources.resource_filename('data', 'lexicon'), 'r') as f:
 			self.wordlist = {l.split('\t')[0]: int(l.split('\t')[1]) for l in f.readlines()}
 
-		def find_pairs(word, grams = 3):
+		def find_pairs(word, grams=10, max_len=20):
 			pairs = []
 			chars = ['_' for _ in range(grams)]
+			word = '{}{}'.format(word, '$' * (max_len-len(word)))
 			for c in word:
 				pairs.append((c, ''.join(chars)))
 				chars = chars[1:] + [c]
@@ -44,16 +45,16 @@ class FrancoArabicTransliterator:
 			word = word.lower()
 			transliteration.append(
 				sorted(self.__transliterate_word('^{}$'.format(word))))
-		
+
 		if method == 'lexicon':
 			self.logger.info('Number of valid strings before lexicon search are: {}'.format(
 				reduce((lambda x, y: x * y), [len(t) for t in transliteration])))
 
 			transliteration = [self.__lexicon_filter(r, w.lower()) for r, w in zip(transliteration, sentence.split())]
-			
+
 			self.logger.info('Number of valid strings after lexicon search are: {}'.format(
 				reduce((lambda x, y: x * y), [len(t) for t in transliteration])))
-			
+
 			return ' '.join([self.__lexicon_disambiguate(results) for results in transliteration])
 		else:
 			return ' '.join([self.__language_model_disambiguate(results) for results in transliteration])
@@ -117,7 +118,7 @@ class FrancoArabicTransliterator:
 
 	def __lexicon_filter(self, word_results, word):
 		"""Use the lexicon to filter the results.
-		
+
 		Keyword arguments:
 		word_results: The list of valid transliterations
 		word: A Franco Arabic word
@@ -141,7 +142,7 @@ class FrancoArabicTransliterator:
 		prob = math.log(self.counts.get((word, context), 0) + 1) - math.log(self.sigma_counts)
 		return prob
 
-	def get_probability(self, word, grams=3):
+	def get_probability(self, word, grams=10):
 		chars = ['_' for _ in range(grams)]
 		prob = 0
 		for c in word:
@@ -149,12 +150,7 @@ class FrancoArabicTransliterator:
 			chars = chars[1:] + [c]
 		return prob
 
-	def __language_model_disambiguate(self, word_results):
-		word_results = {word: self.get_probability(word) for word in word_results}
+	def __language_model_disambiguate(self, word_results, max_len=20):
+		word_results = {word: self.get_probability('{}{}'.format(word, '$' * (max_len-len(word)))) for word in word_results}
+		print(word_results)
 		return sorted(word_results, key=lambda t: word_results[t])[-1]
-
-if __name__=='__main__':
-	# A unit test
-	word = input()
-	transliterator = FrancoArabicTransliterator()
-	print(transliterator.transliterate(word, None))
