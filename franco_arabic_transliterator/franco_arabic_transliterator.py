@@ -4,7 +4,7 @@ import hfst
 import string
 import logging
 import pkg_resources
-from functools import reduce
+from functools import reduce, lru_cache
 from collections import Counter
 
 
@@ -109,6 +109,7 @@ class FrancoArabicTransliterator:
         temperorary_results_dictionary[word] = results
         return results
 
+    @lru_cache(maxsize=1048576)
     def __get_analyses(self, word):
         """Find all the possible matches for a word string in the regex transducer.
 
