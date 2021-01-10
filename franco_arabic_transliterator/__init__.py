@@ -1,1 +1,1 @@
-name = 'franco_arabic_transliterator'
+name = "franco_arabic_transliterator"
