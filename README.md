@@ -11,7 +11,10 @@ from franco_arabic_transliterator.franco_arabic_transliterator import *
 
 str = '2zayak ya 7abeby'
 transliterator = FrancoArabicTransliterator()
-print(transliterator.transliterate(str)) # ازيك يا حبيبي
+
+# Pick up one of the disambiguation methods
+print(transliterator.transliterate(str, method="lexicon")) # ازيك يا حبيبي
+print(transliterator.transliterate(str, method="language-model")) # ازيك يا حبيبي
 
 ```
 ## Live demo
