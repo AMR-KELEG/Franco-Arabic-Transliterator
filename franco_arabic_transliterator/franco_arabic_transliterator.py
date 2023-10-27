@@ -201,5 +201,5 @@ class FrancoArabicTransliterator:
             word: self.get_probability("{}{}".format(word, "$" * (max_len - len(word))))
             for word in word_results
         }
-        # print(word_results)
+
         return sorted(word_results, key=lambda t: word_results[t])[-1]
