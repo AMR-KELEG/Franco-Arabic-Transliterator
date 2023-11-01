@@ -19,5 +19,3 @@ print(transliterator.transliterate(str, method="lexicon")) # ازيك يا حب�
 print(transliterator.transliterate(str, method="language-model")) # ازيك يا حبيبي
 
 ```
-## Live demo
-https://ak-blog.herokuapp.com/franco/
