@@ -42,6 +42,8 @@ class FrancoArabicTransliterator:
 		sentence: A string of Franco Arabic words
 		method: The method used to disambiguate the results ("lexicon" OR "language-model")
 		"""
+
+        sentence = sentence.lower()
         transliteration = []
         for word in sentence.split():
             word = word.lower()
